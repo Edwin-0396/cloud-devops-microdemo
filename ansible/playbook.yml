@@ -1,0 +1,30 @@
+- name: Setup Flask App on EC2
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Install system packages
+      yum:
+        name:
+          - python3
+          - python3-pip
+          - git
+        state: present
+
+    - name: Install Flask
+      pip:
+        name: flask
+
+    - name: Copy app.py
+      copy:
+        src: roles/flask/files/app.py
+        dest: /home/ec2-user/app.py
+        owner: ec2-user
+        mode: 0755
+
+    - name: Start Flask app (background)
+      shell: nohup python3 /home/ec2-user/app.py &
+      args:
+        chdir: /home/ec2-user/
+      async: 0
+      poll: 0
